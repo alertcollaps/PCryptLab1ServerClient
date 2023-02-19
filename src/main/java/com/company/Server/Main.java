@@ -10,11 +10,11 @@ import java.net.InetSocketAddress;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) { //Запуск сервера
         try {
             HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 8080), 0);
             server.createContext("/PAP", new HandlerPAP());
-            server.createContext("/CHAP", new HandlerCHAP());
+            server.createContext("/CHAP", new HandlerCHAP()); //Пути
             server.createContext("/SKEY", new HandlerSKEY());
             server.start();
             System.out.println("Server started!");

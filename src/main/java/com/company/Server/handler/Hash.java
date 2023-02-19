@@ -12,7 +12,7 @@ public class Hash {
     Hash(){
         Security.addProvider(new BouncyCastleProvider());
         try {
-            messageDigest = MessageDigest.getInstance("GOST3411");
+            messageDigest = MessageDigest.getInstance("GOST3411"); //Стрибог
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }

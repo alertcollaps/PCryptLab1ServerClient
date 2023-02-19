@@ -58,7 +58,7 @@ public class HandlerSKEY implements HttpHandler {
                     requestMap.put("N", Hash.bytesToHex(LastRecord.serverN));
                 }
 
-                count = (count + 1) == LastRecord.countN ? 1 : ++count;
+                count = (count + 1) == LastRecord.countN ? 1 : ++count; //Расчет номера транзакции
 
 
 
@@ -80,8 +80,8 @@ public class HandlerSKEY implements HttpHandler {
 
                 if (Arrays.equals(LastRecord.lastHash, hashCompare) && name.equals(LastRecord.lastUserName)) { //Сравнение массивов хешей
                     handleResponse(exchange, "Login success");
-                    LastRecord.increaseUser(name);
-                    LastRecord.lastHash = hash;
+                    LastRecord.increaseUser(name); //Увеличение номера транзации
+                    LastRecord.lastHash = hash; //Сохранение нового значения хеша
                     return;
                 }
                 handleResponse(exchange, "Invalid login or password");

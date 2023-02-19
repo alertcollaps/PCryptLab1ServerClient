@@ -17,12 +17,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
-public class HandlerCHAP implements HttpHandler {
+public class HandlerCHAP implements HttpHandler { //Обработчик протокола CHAP и CHAPMod
     private String preString = "[CHAP]:";
     private final int sizeN = 8;
     @Override
     public void handle(HttpExchange exchange) throws IOException {
-        String response = handlePostRequest(exchange);
+        String response = handlePostRequest(exchange); //Получаем ответ от клиента
         System.out.println(preString + "Server get: " + response);
         String method = "";
         JSONObject jsonObject = null;
@@ -33,31 +33,31 @@ public class HandlerCHAP implements HttpHandler {
         } catch (JSONException ex){
             ex.printStackTrace();
         }
-        switch (method) {
+        switch (method) { //
             case "CHAP":
-                int step = jsonObject.getInt("step");
+                int step = jsonObject.getInt("step"); //Из ответа получаем шаг
                 switch (step) {
-                    case 0:
-                        byte[] N = generateBytes();
+                    case 0: //Сессия 0
+                        byte[] N = generateBytes(); //Генерируем N
                         System.out.println(preString + "Generate N: " + Hash.bytesToHex(N));
                         System.out.println(preString + "Sending to client N");
-                        LastRecord.serverN = N;
-                        handleResponse(exchange, Hash.bytesToHex(N));
+                        LastRecord.serverN = N; //Запись N, для использования в новой сессии
+                        handleResponse(exchange, Hash.bytesToHex(N)); //Отправка клиенту N в hex
                         break;
-                    case 1:
+                    case 1: //Сессия 1
                         if (LastRecord.serverN != null) {
                             N = LastRecord.serverN;
                             String hexHash = jsonObject.getString("hash");
                             byte[] hash = Hash.hexStringToByteArray(hexHash);
                             String pass = "";
                             try {
-                                pass = Login.getPassword(jsonObject.getString("name"));
+                                pass = Login.getPassword(jsonObject.getString("name")); //Из ответа json получаем имя, а через имя - пароль из хранилища
                             } catch (RuntimeException e) {
                                 e.printStackTrace();
                                 return;
                             }
                             Hash hashDig = new Hash();
-                            byte[] hashPass = hashDig.getHash(Hash.concatArrays(N, pass.getBytes(StandardCharsets.UTF_8)));
+                            byte[] hashPass = hashDig.getHash(Hash.concatArrays(N, pass.getBytes(StandardCharsets.UTF_8))); //Хешируем N||pass
                             System.out.println(String.format(preString + "Creating hash from local password -->%s<--: %s", pass, Hash.bytesToHex(hashPass)));
 
 
@@ -69,40 +69,40 @@ public class HandlerCHAP implements HttpHandler {
                             }
                             System.out.println(String.format(preString + "Checking hashes: (from local storage) -->%s<-- /\nand (get from user) -->%s<--: %b\n", Hash.bytesToHex(hashPass),Hash.bytesToHex(hash), false));
 
-                            handleResponse(exchange, "Invalid login or password");
+                            handleResponse(exchange, "Invalid login or password"); //Ответ
 
                         }
                         break;
                 }
                 break;
-            case "CHAP_Mod":
+            case "CHAP_Mod": //Модифицированный CHAP
                 step = jsonObject.getInt("step");
                 switch (step) {
-                    case 0:
-                        String hexN1 = jsonObject.getString("N");
+                    case 0: //Сессия 0
+                        String hexN1 = jsonObject.getString("N"); //Получаем от клиента N
                         byte[] N1 = Hash.hexStringToByteArray(hexN1);
                         LastRecord.userN = N1;
                         byte[] serverN = generateBytes();
                         LastRecord.serverN = serverN;
                         String pass = "";
                         try {
-                            pass = Login.getPassword("server");
+                            pass = Login.getPassword("server"); //Ищем пароль сервера
                         } catch (RuntimeException e) {
                             e.printStackTrace();
                             return;
                         }
                         Hash hashDig = new Hash();
-                        byte[] hashServerPass = hashDig.getHash(Hash.concatArrays(N1, pass.getBytes(StandardCharsets.UTF_8)));
+                        byte[] hashServerPass = hashDig.getHash(Hash.concatArrays(N1, pass.getBytes(StandardCharsets.UTF_8))); //Хешируем пароль сервера
                         System.out.println(String.format(preString + "Creating hash from local password of server -->%s<--: %s", pass, Hash.bytesToHex(hashServerPass)));
 
                         Map<String, String> answer = new HashMap<>();
-                        answer.put("N", Hash.bytesToHex(serverN));
-                        answer.put("hash", Hash.bytesToHex(hashServerPass));
+                        answer.put("N", Hash.bytesToHex(serverN)); //Готовим к отправке N
+                        answer.put("hash", Hash.bytesToHex(hashServerPass)); //Готовим к отправке хеш
                         JSONObject jsnAnswer = new JSONObject(answer);
-                        handleResponse(exchange, jsnAnswer.toString());
+                        handleResponse(exchange, jsnAnswer.toString()); //Отправляем хеш и N
 
                         break;
-                    case 1:
+                    case 1: //Сессия 1
                         if (LastRecord.serverN != null) {
                             serverN = LastRecord.serverN;
                             String hexHash = jsonObject.getString("hash");

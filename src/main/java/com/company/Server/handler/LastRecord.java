@@ -14,10 +14,10 @@ public class LastRecord {
     public static String[] users = Login.logPas[0]; //Имена пользователей
     public static int[] currentCount = new int[users.length]; //Текущее значение счетчика
 
-    static final int countN = 5;
+    static final int countN = 5; //Количество генерируемых хешей
 
 
-    public static int currentCount(String name) {
+    public static int currentCount(String name) { //Для пользователя выдает текущее значение транзакции
         int i = 0;
         for (String user : users){
             if (user.equals(name)){
@@ -28,7 +28,7 @@ public class LastRecord {
         throw new RuntimeException("No user");
     }
 
-    public static void increaseUser(String name){
+    public static void increaseUser(String name){ //Увеличивает значение транзакции
         int i = 0;
         for (String user : users){
             if (user.equals(name)){

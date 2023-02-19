@@ -1,6 +1,6 @@
 package com.company.Server;
 
-public class Login {
+public class Login { //Логины и пароли
     public static String[][] logPas = {{"alex", "trash", "server"}, {"qwerty", "123AAA", "server_pass"}};
     public static String getPassword(String name) throws RuntimeException{
         for (int i = 0; i < logPas[0].length; i++){
